@@ -64,6 +64,32 @@ body{
 .nav .today{color:var(--gold-bright);border-color:var(--gold-dim)}
 .nav .viewing{font-family:var(--display);font-style:italic;font-size:14px;color:var(--ink-mute);min-width:130px;text-align:center}
 
+/* 7-day money strip */
+.weekstrip{display:flex;gap:6px;margin-bottom:22px}
+.wd{flex:1 1 0;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:9px 3px 8px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:4px;transition:.18s;min-width:0;font-family:var(--ui)}
+.wd:hover{border-color:var(--gold-dim)}
+.wd:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.wd.sel{border-color:var(--gold-bright);background:var(--bg3)}
+.wd .ww{font-family:var(--mono);font-size:9.5px;color:var(--ink-mute);letter-spacing:.06em;text-transform:uppercase}
+.wd.sel .ww{color:var(--gold-bright)}
+.wd .barwrap{position:relative;width:100%;height:40px}
+.wd .barwrap::before{content:"";position:absolute;left:16%;right:16%;top:50%;height:1px;background:var(--line)}
+.wd .bar{position:absolute;left:50%;transform:translateX(-50%);width:38%;min-width:7px;border-radius:2px;opacity:.92}
+.wd .dd{font-family:var(--display);font-size:16px;color:var(--ink-dim);line-height:1}
+.wd.sel .dd{color:var(--silver-bright)}
+.wd .sc{font-family:var(--mono);font-size:9px;letter-spacing:.01em}
+
+/* ribbon inspect */
+#winSvg{cursor:crosshair}
+.inspect{margin-top:11px;padding:9px 13px;border:1px solid var(--line2);border-radius:9px;background:var(--bg);
+  font-family:var(--ui);font-size:12.5px;color:var(--ink-dim);line-height:1.5;min-height:20px}
+.inspect .it{font-family:var(--mono);color:var(--silver-bright);font-size:12px}
+.inspect .cg{color:var(--ink);font-weight:600} .inspect .pl{color:var(--gold-bright);font-weight:600}
+.inspect .cm{color:var(--ink-mute)}
+.inspect em{font-style:normal;font-weight:600}
+.inspect .ph{color:var(--ink-mute);font-style:italic}
+
 /* ---------- HERO ---------- */
 .plate{position:relative;border:1px solid var(--line);border-radius:18px;overflow:hidden;
   background:linear-gradient(168deg,var(--bg3),var(--bg2) 62%,var(--bg));
@@ -211,6 +237,8 @@ body{
     <span class="viewing" id="viewing"></span>
   </div>
 
+  <div class="weekstrip" id="weekStrip" aria-label="seven-day money outlook"></div>
+
   <section class="plate">
     <div class="plate-top">
       <div class="scalebox">
@@ -259,6 +287,7 @@ body{
         <span><i style="background:var(--gain-bright)"></i>Labh · gain window</span>
         <span><i style="background:#6e3a32"></i>Rahu / Yamaganda</span>
       </div>
+      <div class="inspect" id="winInspect"><span class="ph">Tap or hover any moment to read its choghadiya and planetary hour.</span></div>
     </div>
   </section>
 
@@ -576,9 +605,11 @@ function buildWindows(c){
 /* ============================================================================
    AGGREGATION
    ============================================================================ */
-function aggregate(systems){
+function aggregate(systems, personal){
   var fav={},avo={},favSrc={},avoSrc={};
-  systems.forEach(function(s){
+  var list=systems.slice();
+  if(personal && (personal.yi.length||personal.ji.length)) list.push({rel:personal.rel,yi:personal.yi,ji:personal.ji,name:personal.name});
+  list.forEach(function(s){
     s.yi.forEach(function(k){fav[k]=(fav[k]||0)+s.rel;(favSrc[k]=favSrc[k]||[]).push(s.name);});
     s.ji.forEach(function(k){avo[k]=(avo[k]||0)+s.rel;(avoSrc[k]=avoSrc[k]||[]).push(s.name);});
   });
@@ -608,15 +639,42 @@ function readDay(y,m,d){
   var wsum=0,qsum=0; systems.forEach(function(s){wsum+=s.rel;qsum+=s.rel*s.quality;});
   var base=qsum/wsum;
 
-  // personal wealth calibration
-  var stemEl=STEM_EL[ds.s], brEl=BR_EL[db];
-  var metalDay=(stemEl===WEALTH_EL||brEl===WEALTH_EL);     // 庚辛 / 申酉
-  var clash=(db===8), harmony6=(db===11), trine=(db===6||db===10);
-  var personal=0, pmsg=null;
-  if(clash){personal-=0.10; pmsg='Your wealth element 金 is active today (申), but 申 clashes your natal 寅 (寅申冲) — money moves, yet volatile. Favour collecting and settling over speculation.';}
-  else if(metalDay){personal+=0.10; pmsg='Metal — your 財星 — is prominent today. Wealth energy is active; act with structure, not impulse.';}
-  else if(trine){personal+=0.08; pmsg='Part of your 寅午戌 Fire trine — your judgement is well-supported today.';}
-  else if(harmony6){personal+=0.10; pmsg='寅亥合 — the day sits in quiet harmony with your pillar.';}
+  // --- finer 財星 (Metal wealth element) calibration, tiered ---
+  var stemEl=STEM_EL[ds.s];
+  var metalDay=(STEM_EL[ds.s]===WEALTH_EL||BR_EL[db]===WEALTH_EL);  // 庚辛 / 申酉
+  var clash=(db===8), trine=(db===6||db===10), harmony6=(db===11);
+  var personal=0, pmsg=null, pYi=[], pJi=[], wealthTier=null;
+  if(clash){
+    personal=-0.10; wealthTier='volatile';
+    pmsg='Your wealth element 金 is active today (申), but 申 clashes your natal 寅 (寅申冲) — money moves, yet volatile. Favour collecting and settling over speculation.';
+    pYi=['collect','settle']; pJi=['speculate','invest'];
+  } else if(ds.s===7 && db===9){          // 辛酉 — Metal on stem AND branch, no clash
+    personal=0.16; wealthTier='pure';
+    pmsg='辛酉 — your wealth element 金 sits clean and strong on both stem and branch, with no clash. A clear 財 day: collect, lock in terms, and consolidate.';
+    pYi=['seek','collect','save','deal'];
+  } else if(ds.s===6){                     // 庚 — Yang Metal on stem
+    personal=0.12; wealthTier='stem';
+    pmsg='庚 — Yang Metal, your wealth element, leads the day on the stem. Good for actively seeking and collecting.';
+    pYi=['seek','collect'];
+  } else if(ds.s===7){                     // 辛 — Yin Metal on stem
+    personal=0.12; wealthTier='stem';
+    pmsg='辛 — Yin Metal, your refined wealth element, leads the day. Good for deals, pricing, and negotiation.';
+    pYi=['deal','negotiate','collect'];
+  } else if(db===9){                       // 酉 — pure Yin Metal on branch
+    personal=0.12; wealthTier='branch';
+    pmsg='酉 — your wealth element 金 sits pure on the branch. A clean 財 day; favour collecting and consolidating.';
+    pYi=['collect','save','seek'];
+  } else if(db===1){                       // 丑 — 金墓, your 財庫 (wealth vault)
+    personal=0.08; wealthTier='vault';
+    pmsg='丑 is your 財庫 — the wealth vault (金 enters its storehouse). A day to store and lock away reserves (入庫), not to chase.';
+    pYi=['save','collect']; pJi=['speculate'];
+  } else if(trine){
+    personal=0.08;
+    pmsg='Part of your 寅午戌 Fire trine — your judgement is well-supported today.';
+  } else if(harmony6){
+    personal=0.10;
+    pmsg='寅亥合 — the day sits in quiet harmony with your pillar.';
+  }
   var score=Math.max(-1,Math.min(1,base+personal));
 
   var label,tone;
@@ -627,7 +685,7 @@ function readDay(y,m,d){
   else {label='Protect & wait';tone='poor';}
   if(clash && score>-0.10){label='Active but volatile';tone='volatile';}
 
-  var agg=aggregate(systems);
+  var agg=aggregate(systems, {rel:0.7, yi:pYi, ji:pJi, name:'財星'});
   var windows=buildWindows(ctx);
 
   // 日祿 prosperity direction
@@ -642,7 +700,7 @@ function readDay(y,m,d){
     weekday:['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][wd],
     prosperity:prosperity,
     money:{score:score, label:label, tone:tone, base:base, personal:personal,
-           clash:clash, metalDay:metalDay, note:pmsg, wealthEl:'金'},
+           clash:clash, metalDay:metalDay, wealthTier:wealthTier, note:pmsg, wealthEl:'金'},
     systems:systems,
     favourable:agg.favourable,
     avoid:agg.avoid,
@@ -669,7 +727,7 @@ function mytNow(){var now=new Date();var m=new Date(now.getTime()+(now.getTimezo
   return {y:m.getFullYear(),mo:m.getMonth()+1,d:m.getDate(),h:m.getHours(),mi:m.getMinutes(),s:m.getSeconds(),date:m};}
 function hm(x){var h=Math.floor(x),m=Math.round((x-h)*60);if(m===60){h++;m=0;}return pad(h)+':'+pad(m);}
 
-var today,view;
+var today,view,curRibbon=null;
 function sameDay(a,b){return a.y===b.y&&a.mo===b.mo&&a.d===b.d;}
 function viewDateObj(){return new Date(view.y,view.mo-1,view.d);}
 function shiftView(delta){var dt=viewDateObj();dt.setDate(dt.getDate()+delta);view={y:dt.getFullYear(),mo:dt.getMonth()+1,d:dt.getDate()};render();}
@@ -678,7 +736,9 @@ function render(){
   var r=Tael.readDay(view.y,view.mo,view.d);
   var isToday=sameDay(view,today);
 
-  var metalChip=r.money.metalDay?'<span class="chip metal"><b>金</b>wealth element active</span>':'';
+  var WC={volatile:['金','wealth active · volatile'],pure:['金','wealth · clean & strong'],stem:['金','wealth on the stem'],branch:['金','wealth on the branch'],vault:['財庫','wealth vault day']};
+  var wt=r.money.wealthTier, wc=wt?WC[wt]:(r.money.metalDay?['金','wealth element active']:null);
+  var metalChip=wc?'<span class="chip metal"><b>'+wc[0]+'</b>'+wc[1]+'</span>':'';
   $('chips').innerHTML=
     '<span class="chip gold"><b>'+r.pillar.day+'</b>day</span>'+
     '<span class="chip"><b>'+r.officer+'</b>'+OFFICER_EN[r.officer]+' officer</span>'+
@@ -708,11 +768,36 @@ function render(){
   $('guardList').innerHTML=r.avoid.length?r.avoid.map(function(a){return actRow(a,'j');}).join(''):'<div class="empty">Nothing is specially flagged to guard against today.</div>';
 
   $('sysGrid').innerHTML=r.systems.map(sysCard).join('');
+  renderWeek();
   renderWindows(r,isToday);
-  $('winHint').textContent=isToday?'MYT · live':'hours for '+pad(view.d)+' '+MON[view.mo-1];
+  $('winHint').textContent=isToday?'tap any moment · MYT':'tap any moment · '+pad(view.d)+' '+MON[view.mo-1];
 }
 
 function dirName(d){return {N:'North',NE:'North-east',E:'East',SE:'South-east',S:'South',SW:'South-west',W:'West',NW:'North-west'}[d]||d;}
+
+/* ---------- 7-day money strip ---------- */
+function toneColor(t){return {strong:'var(--gain-bright)',favourable:'var(--gain)',mixed:'var(--ink-mute)',guard:'var(--guard)',poor:'var(--guard-bright)',volatile:'var(--gold-bright)'}[t]||'var(--ink-mute)';}
+function fmtScore(s){return (s>=0?'+':'\u2212')+Math.abs(s).toFixed(2).replace(/^0/,'');}
+function renderWeek(){
+  var html='';
+  for(var i=0;i<7;i++){
+    var dt=new Date(today.y,today.mo-1,today.d+i);
+    var rr=Tael.readDay(dt.getFullYear(),dt.getMonth()+1,dt.getDate());
+    var sel=sameDay(view,{y:dt.getFullYear(),mo:dt.getMonth()+1,d:dt.getDate()});
+    var sc=rr.money.score, col=toneColor(rr.money.tone);
+    var h=Math.max(4,Math.min(19,Math.abs(sc)*34)), pos=sc>=0?'bottom:50%':'top:50%';
+    html+='<button class="wd'+(sel?' sel':'')+'" data-off="'+i+'" title="'+dt.getDate()+' '+MON[dt.getMonth()]+' · '+rr.pillar.day+' · '+rr.money.label+'">'
+      +'<span class="ww">'+WD3[dt.getDay()]+'</span>'
+      +'<span class="barwrap"><span class="bar" style="'+pos+';height:'+h.toFixed(0)+'px;background:'+col+'"></span></span>'
+      +'<span class="dd">'+dt.getDate()+'</span>'
+      +'<span class="sc" style="color:'+col+'">'+fmtScore(sc)+'</span>'
+      +'</button>';
+  }
+  var ws=$('weekStrip'); ws.innerHTML=html;
+  Array.prototype.forEach.call(ws.querySelectorAll('.wd'),function(b){
+    b.addEventListener('click',function(){var off=+b.getAttribute('data-off');var dt=new Date(today.y,today.mo-1,today.d+off);view={y:dt.getFullYear(),mo:dt.getMonth()+1,d:dt.getDate()};render();});
+  });
+}
 
 /* ---------- balance scale ---------- */
 function drawScale(score,tone){
@@ -775,10 +860,10 @@ function actRow(a,cls){
   var max=cls==='y'?MAXFAV:MAXAVO, srcN=a.sources.length;
   return '<div class="act"><span class="cn">'+a.cn+'</span>'+
     '<span class="body"><span class="en">'+a.en+'</span>'+
-      '<span class="src">'+srcN+' system'+(srcN>1?'s':'')+' · '+a.sources.map(shortSys).join(' · ')+'</span></span>'+
+      '<span class="src">'+srcN+' source'+(srcN>1?'s':'')+' · '+a.sources.map(shortSys).join(' · ')+'</span></span>'+
     '<span class="str">'+strDots(a.score,max)+'</span></div>';
 }
-function shortSys(n){return {'Twelve Officers':'建除','Yellow-Black Path':'黄黑道','28 Mansions':'宿','Tithi':'Tithi','Nakshatra':'Nakṣ','Weekday Lord':'曜'}[n]||n;}
+function shortSys(n){return {'Twelve Officers':'建除','Yellow-Black Path':'黄黑道','28 Mansions':'宿','Tithi':'Tithi','Nakshatra':'Nakṣ','Weekday Lord':'曜','財星':'財星'}[n]||n;}
 
 function sysCard(s){
   var q=s.quality,w=Math.abs(q)*50,left=q>=0?50:(50-w),col=q>=0?'var(--gain)':'var(--guard)';
@@ -816,8 +901,21 @@ var WX=14,WW=932,WTOP=42,WH=64,WBASE=WTOP+WH;
 function xAt(h){return WX+(h/24)*WW;}
 function heatColor(v){if(v>=0)return mix([90,107,82],[79,197,138],v);return mix([90,107,82],[197,106,74],-v);}
 function mix(a,b,t){t=Math.max(0,Math.min(1,t));return 'rgb('+Math.round(a[0]+(b[0]-a[0])*t)+','+Math.round(a[1]+(b[1]-a[1])*t)+','+Math.round(a[2]+(b[2]-a[2])*t)+')';}
+
+/* ---------- ribbon inspect ---------- */
+var CHOG_MEAN={Amrit:['Amrit','nectar — highly auspicious'],Shubh:['Shubh','auspicious'],Labh:['Labh 利','gain — favours money moves'],Char:['Char','movable — fine for routine'],Udveg:['Udveg','unsettled — avoid commitments'],Rog:['Rog','affliction — hold off'],Kaal:['Kaal','inauspicious — hold off']};
+var PLANET_MEAN={Jupiter:'wealth & expansion',Mercury:'commerce & trade',Venus:'value & negotiation',Sun:'authority & resolve',Moon:'flow & the public',Mars:'haste & risk',Saturn:'delay & debt'};
+function inspect(i){
+  if(!curRibbon||!curRibbon[i])return;
+  var c=curRibbon[i], st=c.h-0.25, en=c.h+0.25, cm=CHOG_MEAN[c.chog]||[c.chog,''];
+  var verd=c.v>=0.45?['act freely','var(--gain-bright)']:c.v>=0.1?['steady','var(--gain)']:c.v>-0.1?['neutral','var(--ink-dim)']:c.v>=-0.45?['be cautious','var(--guard)']:['hold off','var(--guard-bright)'];
+  $('winInspect').innerHTML='<span class="it">'+hm(st)+'\u2013'+hm(en)+'</span> &nbsp; <b class="cg">'+cm[0]+'</b> <span class="cm">'+cm[1]+'</span> &nbsp;·&nbsp; <b class="pl">'+c.planet+'</b> <span class="cm">hour · '+(PLANET_MEAN[c.planet]||'')+'</span> &nbsp;·&nbsp; <em style="color:'+verd[1]+'">'+verd[0]+'</em>';
+  var sel=document.getElementById('selCell');
+  if(sel){var cw=WW/curRibbon.length,x=WX+i*cw;sel.setAttribute('x',x.toFixed(1));sel.setAttribute('width',cw.toFixed(1));sel.setAttribute('visibility','visible');}
+}
 function renderWindows(r,isToday){
   var w=r.windows,svg=$('winSvg'),cells=w.ribbon,n=cells.length,cw=WW/n,html='';
+  curRibbon=cells;
   for(var i=0;i<n;i++){var c=cells[i],x=WX+i*cw;
     html+='<rect x="'+x.toFixed(1)+'" y="'+WTOP+'" width="'+(cw+0.6).toFixed(1)+'" height="'+WH+'" fill="'+heatColor(c.v)+'" opacity="'+(0.34+0.5*Math.abs(c.v)).toFixed(2)+'"/>';}
   html+='<g pointer-events="none">';
@@ -843,7 +941,10 @@ function renderWindows(r,isToday){
   if(isToday){var t=mytNow(),nowH=t.h+t.mi/60+t.s/3600,nx=xAt(nowH);
     html+='<g class="now-pulse" pointer-events="none"><line x1="'+nx.toFixed(1)+'" y1="'+(WTOP-12)+'" x2="'+nx.toFixed(1)+'" y2="'+(WBASE+2)+'" stroke="var(--gold-bright)" stroke-width="2"/>'+
       '<polygon points="'+(nx-4).toFixed(1)+','+(WTOP-12)+' '+(nx+4).toFixed(1)+','+(WTOP-12)+' '+nx.toFixed(1)+','+(WTOP-6)+'" fill="var(--gold-bright)"/></g>';}
+  html+='<rect id="selCell" y="'+WTOP+'" height="'+WH+'" rx="1.5" fill="rgba(232,237,241,0.06)" stroke="var(--silver-bright)" stroke-width="1.2" visibility="hidden" pointer-events="none"/>';
   svg.innerHTML=html;
+  var di = isToday ? Math.floor((mytNow().h+mytNow().mi/60)/0.5) : Math.floor(w.noon/0.5);
+  inspect(Math.max(0,Math.min(cells.length-1,di)));
 }
 
 function tick(){
@@ -862,6 +963,12 @@ function boot(){
   $('next').addEventListener('click',function(){shiftView(1);});
   $('todayBtn').addEventListener('click',function(){view={y:today.y,mo:today.mo,d:today.d};render();});
   document.addEventListener('keydown',function(e){if(e.key==='ArrowLeft')shiftView(-1);else if(e.key==='ArrowRight')shiftView(1);});
+  var sv=$('winSvg');
+  function idxFromEvt(e){var rect=sv.getBoundingClientRect();var cx=(e.touches&&e.touches[0]?e.touches[0].clientX:e.clientX);var xu=((cx-rect.left)/rect.width)*960;var len=curRibbon?curRibbon.length:48;return Math.max(0,Math.min(len-1,Math.floor((xu-WX)/(WW/len))));}
+  sv.addEventListener('mousemove',function(e){inspect(idxFromEvt(e));});
+  sv.addEventListener('click',function(e){inspect(idxFromEvt(e));});
+  sv.addEventListener('touchstart',function(e){inspect(idxFromEvt(e));},{passive:true});
+  sv.addEventListener('touchmove',function(e){inspect(idxFromEvt(e));},{passive:true});
   render(); tick();
   var d=new Date(),ms=1000-d.getMilliseconds(); setTimeout(function(){tick();setInterval(tick,1000);},ms);
 }
