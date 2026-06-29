@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Tael · 財 money almanac</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Noto+Sans+TC:wght@400;500;700;900&family=Inter:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A0C0E; --bg2:#0F1318; --bg3:#151A20; --bg4:#1C232B;
+  --line:#252D36; --line-soft:#1A2128;
+  --line2:#1B232B;
+  --silver:#C7CFD6; --silver-bright:#E8EDF1; --silver-dim:#8A929B;
+  --gold:#B8923D; --gold-bright:#E0B85A; --gold-dim:#7E6228;
+  --gain:#4FC58A; --gain-bright:#6FE3A6; --gain-deep:#1E5740;
+  --guard:#C56A4A; --guard-bright:#E08A66; --guard-deep:#5A2E1E;
+  --ink:#E4E9EE; --ink-dim:#A6B0BA; --ink-mute:#6B7480; --ink-faint:#454D56;
+  --display:'Libre Caslon Display',Georgia,'Times New Roman',serif;
+  --cjk:'Noto Sans TC',system-ui,sans-serif;
+  --ui:'Inter',system-ui,-apple-system,sans-serif;
+  --mono:'DM Mono','SF Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--ui);
+  line-height:1.5; letter-spacing:.005em;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  background-image:
+    radial-gradient(1000px 540px at 82% -10%, rgba(184,146,61,.08), transparent 60%),
+    radial-gradient(760px 460px at 8% 4%, rgba(79,197,138,.045), transparent 64%);
+  background-attachment:fixed;
+}
+.wrap{max-width:1120px;margin:0 auto;padding:22px clamp(14px,3.4vw,34px) 60px}
+
+/* ---------- header ---------- */
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap}
+.brand .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold-dim)}
+.brand h1{font-family:var(--display);font-weight:400;font-size:clamp(36px,5.8vw,56px);line-height:.94;color:var(--silver-bright);margin-top:8px;letter-spacing:.005em}
+.brand h1 .han{font-family:var(--cjk);font-weight:900;font-size:.52em;color:var(--gold-bright);margin-left:.34em;vertical-align:.1em}
+.brand .sub{font-family:var(--display);font-style:italic;font-size:14.5px;color:var(--ink-mute);margin-top:8px}
+.rightcol{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:9px;min-width:200px}
+.clock{font-family:var(--mono);font-weight:500;font-size:clamp(20px,3vw,26px);color:var(--gold-bright);letter-spacing:.02em}
+.clock .tz{font-size:.5em;color:var(--ink-mute);letter-spacing:.16em;margin-left:.4em}
+.datestamp{font-family:var(--mono);font-size:11px;color:var(--ink-dim);letter-spacing:.04em}
+.chips{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.chip{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--ink-dim);
+  border:1px solid var(--line);border-radius:7px;padding:4px 10px;background:rgba(255,255,255,.012);white-space:nowrap}
+.chip b{font-family:var(--cjk);font-weight:700;color:var(--ink);margin-right:3px}
+.chip.gold b{color:var(--gold-bright)} .chip.metal{border-color:rgba(199,207,214,.3)}
+.chip.metal b{color:var(--silver-bright)}
+
+.rule{height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent);margin:20px 0 22px}
+
+/* ---------- date nav ---------- */
+.nav{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:20px}
+.nav button{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--ink-dim);
+  background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;transition:.2s}
+.nav button:hover{border-color:var(--gold-dim);color:var(--ink)}
+.nav button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.nav .today{color:var(--gold-bright);border-color:var(--gold-dim)}
+.nav .viewing{font-family:var(--display);font-style:italic;font-size:14px;color:var(--ink-mute);min-width:130px;text-align:center}
+
+/* ---------- HERO ---------- */
+.plate{position:relative;border:1px solid var(--line);border-radius:18px;overflow:hidden;
+  background:linear-gradient(168deg,var(--bg3),var(--bg2) 62%,var(--bg));
+  box-shadow:0 1px 0 rgba(255,255,255,.025) inset, 0 30px 70px -52px rgba(0,0,0,.92)}
+.plate-top{display:grid;grid-template-columns:300px 1fr;gap:clamp(16px,3vw,32px);
+  padding:clamp(18px,3vw,28px) clamp(18px,3.2vw,32px) clamp(16px,2.4vw,22px);
+  border-bottom:1px solid var(--line2)}
+
+/* balance scale */
+.scalebox{display:flex;flex-direction:column;align-items:center;gap:6px}
+#scaleSvg{width:100%;max-width:300px;height:auto;display:block}
+.scalecap{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint)}
+
+/* verdict */
+.verdict{display:flex;flex-direction:column;justify-content:center;min-width:0}
+.verdict .kicker{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-mute)}
+.verdict .label{font-family:var(--display);font-weight:400;font-size:clamp(30px,5.4vw,48px);line-height:1.02;margin:5px 0 4px;letter-spacing:.005em}
+.verdict .pillarline{font-family:var(--mono);font-size:11.5px;color:var(--ink-dim);letter-spacing:.03em;line-height:1.7}
+.verdict .pillarline .han{font-family:var(--cjk);color:var(--silver-bright);font-weight:500}
+.verdict .pnote{font-family:var(--display);font-style:italic;font-size:14.5px;line-height:1.42;margin-top:11px;
+  padding:9px 13px;border-left:2px solid var(--gold-dim);background:rgba(184,146,61,.05);border-radius:0 8px 8px 0;color:var(--ink-dim)}
+.verdict .pnote.volatile{border-left-color:var(--gold-bright);background:rgba(224,184,90,.07)}
+
+.tone-strong .label,.tone-favourable .label{color:var(--gain-bright)}
+.tone-mixed .label{color:var(--silver-bright)}
+.tone-volatile .label{color:var(--gold-bright)}
+.tone-guard .label,.tone-poor .label{color:var(--guard-bright)}
+
+/* prosperity compass row */
+.prosrow{display:flex;align-items:center;gap:14px;margin-top:14px;padding-top:13px;border-top:1px solid var(--line2)}
+#compass{width:60px;height:60px;flex:0 0 60px}
+.prosrow .pt{min-width:0}
+.prosrow .pt .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-mute)}
+.prosrow .pt .v{font-family:var(--display);font-size:19px;color:var(--gold-bright);margin-top:2px}
+.prosrow .pt .v .han{font-family:var(--cjk);font-weight:500;color:var(--silver);font-size:.82em;margin-left:6px}
+.prosrow .pt .d{font-family:var(--ui);font-size:11.5px;color:var(--ink-mute);margin-top:2px}
+
+/* 進 / 守 ledger */
+.ledger{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.col{padding:clamp(16px,2.4vw,22px) clamp(16px,3vw,28px) clamp(18px,2.6vw,24px)}
+.col.gain{border-right:1px solid var(--line2)}
+.col-head{display:flex;align-items:baseline;gap:11px;margin-bottom:13px}
+.col-head .seal{font-family:var(--cjk);font-weight:900;font-size:27px;line-height:1;width:42px;height:42px;
+  display:flex;align-items:center;justify-content:center;border-radius:9px;flex:0 0 42px}
+.gain .seal{color:var(--gain-bright);background:rgba(79,197,138,.10);border:1px solid rgba(79,197,138,.26)}
+.guard .seal{color:var(--guard-bright);background:rgba(197,106,74,.10);border:1px solid rgba(197,106,74,.28)}
+.col-head .t{font-family:var(--display);font-size:14.5px;color:var(--ink-dim)}
+.col-head .t b{display:block;font-size:18px;font-weight:400;color:var(--ink);font-style:normal;font-family:var(--display)}
+.acts{display:flex;flex-direction:column;gap:2px}
+.act{display:flex;align-items:center;gap:12px;padding:8px 9px;border-radius:9px;transition:background .15s}
+.act:hover{background:rgba(255,255,255,.022)}
+.act .cn{font-family:var(--cjk);font-weight:700;font-size:18px;flex:0 0 auto;letter-spacing:.02em}
+.gain .act .cn{color:var(--gain-bright)} .guard .act .cn{color:var(--guard-bright)}
+.act .body{min-width:0;flex:1}
+.act .en{font-family:var(--ui);font-size:13.5px;color:var(--ink);font-weight:500;line-height:1.25}
+.act .src{font-family:var(--mono);font-size:9.5px;color:var(--ink-mute);letter-spacing:.02em;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.act .str{display:flex;gap:2.5px;flex:0 0 auto}
+.act .str i{width:5px;height:5px;border-radius:50%;background:var(--ink-faint)}
+.gain .act .str i.on{background:var(--gain)} .guard .act .str i.on{background:var(--guard)}
+.col .empty{font-family:var(--display);font-style:italic;color:var(--ink-mute);font-size:14px;padding:8px 9px}
+
+/* ---------- sections ---------- */
+.section{margin-top:30px}
+.section-head{display:flex;align-items:baseline;gap:12px;margin-bottom:14px}
+.section-head .n{font-family:var(--cjk);font-size:13px;color:var(--gold-dim);font-weight:500}
+.section-head h2{font-family:var(--display);font-weight:400;font-size:20px;color:var(--ink)}
+.section-head .hint{font-family:var(--ui);font-size:12px;color:var(--ink-mute);margin-left:auto}
+
+.windows{border:1px solid var(--line);border-radius:14px;background:var(--bg2);padding:16px clamp(12px,2.4vw,20px) 14px}
+#winSvg{display:block;width:100%;height:auto;overflow:visible}
+.wlegend{display:flex;flex-wrap:wrap;gap:13px;margin-top:12px;font-family:var(--mono);font-size:10px;color:var(--ink-mute);letter-spacing:.03em}
+.wlegend span{display:inline-flex;align-items:center;gap:6px}
+.wlegend i{width:11px;height:7px;border-radius:2px;display:inline-block}
+
+/* systems */
+.sysgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.syscard{border:1px solid var(--line);border-radius:13px;background:linear-gradient(180deg,var(--bg3),var(--bg2));
+  padding:15px 16px 16px;display:flex;flex-direction:column;gap:11px;transition:.2s}
+.syscard:hover{border-color:var(--gold-dim);transform:translateY(-1px)}
+.syscard .sh{display:flex;align-items:center;gap:12px}
+.syscard .gl{font-family:var(--cjk);font-weight:700;font-size:25px;line-height:1;color:var(--gold-bright);
+  width:40px;height:34px;display:flex;align-items:center;justify-content:center;flex:0 0 40px;overflow:hidden}
+.syscard .si{min-width:0;flex:1}
+.syscard .nm{font-family:var(--ui);font-weight:600;font-size:13px;color:var(--ink)}
+.syscard .nv{font-family:var(--cjk);font-size:12px;color:var(--ink-dim);margin-top:2px;line-height:1.35}
+.syscard .rd{font-family:var(--display);font-size:13px;font-style:italic;color:var(--ink-mute);line-height:1.4;min-height:18px}
+.syscard .tags{display:flex;flex-wrap:wrap;gap:5px}
+.tag{font-family:var(--cjk);font-size:11.5px;font-weight:500;padding:2.5px 8px;border-radius:6px;letter-spacing:.02em}
+.tag.y{color:var(--gain-bright);background:rgba(79,197,138,.09);border:1px solid rgba(79,197,138,.2)}
+.tag.j{color:var(--guard-bright);background:rgba(197,106,74,.09);border:1px solid rgba(197,106,74,.22)}
+.tag .te{font-family:var(--ui);font-size:8.5px;font-weight:400;color:var(--ink-mute);margin-left:5px;text-transform:lowercase;letter-spacing:.01em;vertical-align:.4px}
+.syscard .nvg{font-family:var(--ui);font-size:10px;color:var(--ink-mute);margin-left:7px;letter-spacing:.01em}
+.verdict .pillarline .eng{color:var(--ink-mute)}
+.syscard .qbar{height:4px;border-radius:3px;background:var(--bg4);position:relative}
+.syscard .qbar .z{position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--line)}
+.syscard .qbar i{position:absolute;top:0;bottom:0;border-radius:3px}
+
+/* footer */
+.foot{margin-top:38px;padding-top:20px;border-top:1px solid var(--line)}
+.foot .methods{font-family:var(--mono);font-size:10.5px;color:var(--ink-mute);letter-spacing:.02em;line-height:1.95}
+.foot .methods b{color:var(--gold-dim);font-weight:500}
+.foot .honest{font-family:var(--display);font-style:italic;font-size:clamp(14px,2vw,16.5px);color:var(--ink-dim);margin-top:13px;max-width:800px;line-height:1.5}
+.foot .sig{font-family:var(--mono);font-size:9.5px;color:var(--ink-faint);letter-spacing:.14em;text-transform:uppercase;margin-top:15px}
+
+/* responsive */
+@media(max-width:840px){.sysgrid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:620px){
+  .top{flex-direction:column}.rightcol{align-items:flex-start;text-align:left}.chips{justify-content:flex-start}
+  .plate-top{grid-template-columns:1fr;gap:16px}
+  #scaleSvg{max-width:260px}
+  .ledger{grid-template-columns:1fr}
+  .col.gain{border-right:none;border-bottom:1px solid var(--line2)}
+}
+@media(max-width:440px){.sysgrid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.fade{opacity:0;transform:translateY(8px);animation:fu .6s ease forwards}
+@keyframes fu{to{opacity:1;transform:none}}
+.now-pulse{animation:np 2.4s ease-in-out infinite}
+@keyframes np{0%,100%{opacity:.55}50%{opacity:1}}
+#scaleBeam{transition:transform .8s cubic-bezier(.2,.8,.2,1)}
+</style>
+</head>
+<body>
+<div class="wrap fade">
+
+  <header class="top">
+    <div class="brand">
+      <div class="eyebrow">Money Almanac · Kuala Lumpur</div>
+      <h1>Tael<span class="han">財</span></h1>
+      <div class="sub">The day, weighed for money — what to pursue, and what to protect.</div>
+    </div>
+    <div class="rightcol">
+      <div class="clock" id="clk">--:--:--<span class="tz">MYT</span></div>
+      <div class="datestamp" id="datestamp">—</div>
+      <div class="chips" id="chips"></div>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <div class="nav">
+    <button id="prev" aria-label="Previous day">‹ Prev</button>
+    <button class="today" id="todayBtn">Today</button>
+    <button id="next" aria-label="Next day">Next ›</button>
+    <span class="viewing" id="viewing"></span>
+  </div>
+
+  <section class="plate">
+    <div class="plate-top">
+      <div class="scalebox">
+        <svg id="scaleSvg" viewBox="0 0 300 220" role="img" aria-label="balance scale weighing the day for money"></svg>
+        <div class="scalecap" id="scaleCap">the day, weighed</div>
+      </div>
+      <div class="verdict" id="verdict">
+        <div class="kicker">For money, today reads as</div>
+        <div class="label" id="verdictLabel">—</div>
+        <div class="pillarline" id="pillarline">—</div>
+        <div class="pnote" id="pnote" style="display:none"></div>
+        <div class="prosrow">
+          <svg id="compass" viewBox="0 0 120 120" role="img" aria-label="prosperity direction compass"></svg>
+          <div class="pt">
+            <div class="k">Prosperity quarter · 日祿</div>
+            <div class="v" id="prosVal">—</div>
+            <div class="d">the day-stem’s classical 祿 position — its auspicious wealth direction</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ledger">
+      <div class="col gain">
+        <div class="col-head"><div class="seal">進</div><div class="t"><b>Favourable</b>where money wants to move</div></div>
+        <div class="acts" id="gainList"></div>
+      </div>
+      <div class="col guard">
+        <div class="col-head"><div class="seal">守</div><div class="t"><b>Guard</b>where money leaks — hold back</div></div>
+        <div class="acts" id="guardList"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <span class="n">時</span><h2>Hours to act, hours to hold</h2>
+      <span class="hint" id="winHint">MYT</span>
+    </div>
+    <div class="windows">
+      <svg id="winSvg" viewBox="0 0 960 178" role="img" aria-label="24 hour money timeline"></svg>
+      <div class="wlegend">
+        <span><i style="background:var(--gain)"></i>act freely</span>
+        <span><i style="background:#5a6b52"></i>steady</span>
+        <span><i style="background:var(--guard)"></i>hold off</span>
+        <span><i style="background:var(--gold-bright)"></i>Abhijit · golden midday</span>
+        <span><i style="background:var(--gain-bright)"></i>Labh · gain window</span>
+        <span><i style="background:#6e3a32"></i>Rahu / Yamaganda</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <span class="n">證</span><h2>What each tradition says of money</h2>
+      <span class="hint">six day-level systems</span>
+    </div>
+    <div class="sysgrid" id="sysGrid"></div>
+  </section>
+
+  <footer class="foot">
+    <div class="methods">
+      Weighing the day across <b>12 Day Officers 建除</b> · <b>Yellow-Black Path 黄黑道</b> (incl. 金匮, the wealth chest) · <b>28 Mansions 二十八宿</b> · <b>Tithi</b> · <b>Nakshatra</b> (incl. Dhaniṣṭhā, the wealth star) · <b>Weekday Lord</b>, with money hours from <b>Choghadiya</b> (Labh = gain), <b>Planetary Hours</b>, <b>Rahu / Yamaganda</b> and <b>Abhijit</b>, plus the day-stem’s <b>日祿</b> prosperity direction. Calibrated to your 丙寅 pillar — wealth element 金.
+    </div>
+    <div class="honest">These are traditional wealth-timing notions, rendered faithfully and aggregated honestly — they do not predict markets, prices, or returns, and a “favourable” day is never a reason to take on more risk. Read this as a structure for financial discipline: when to collect, settle, negotiate, and hold back. Not a forecast, and not the Oracle — that one is for the trade itself.</div>
+    <div class="sig">Tael · 財 money almanac · reference UTC+8 · natal 丙寅 · wealth element 金 · Petaling Jaya 3.10°N 101.61°E</div>
+  </footer>
+
+</div>
+
+<script>
+/* ============================================================================
+   TAEL — Daily money 宜忌 almanac engine (wealth matters only)
+   Reads the day's wealth signals across classical systems and aggregates each
+   tradition's money-宜 / money-忌 into favourable & guard lists, plus the
+   day-stem's 祿 (prosperity) direction and the auspicious/inauspicious hours
+   to act on money. Self-contained, deterministic, offline. TZ = MYT (UTC+8).
+   Personal calibration: Au Kar Wai, day pillar 丙寅 — Day Master 丙 Yang Fire,
+   wealth element (財星) = Metal 金. Branch 申 carries his wealth element but
+   clashes natal 寅 (寅申冲): money active but volatile on 申 days.
+   NOTE: these are traditional wealth-timing notions, rendered faithfully and
+   aggregated honestly. They do NOT predict markets, prices, or returns, and a
+   "favourable" day is not a reason to take on more risk. A structure for
+   financial discipline and intention — not a forecast.
+   ============================================================================ */
+(function(global){
+'use strict';
+var TZ=8, LAT=3.1014, LON=101.6147;
+var D2R=Math.PI/180, R2D=180/Math.PI;
+function n360(x){x%=360;return x<0?x+360:x;}
+
+/* ---------- validated astronomy (ported from Auspice/Oracle, unchanged) ---------- */
+function jdnInt(y,m,d){var a=Math.floor((14-m)/12),yy=y+4800-a,mm=m+12*a-3;
+  return d+Math.floor((153*mm+2)/5)+365*yy+Math.floor(yy/4)-Math.floor(yy/100)+Math.floor(yy/400)-32045;}
+function sunLong(J){var T=(J-2451545)/36525;
+  var L0=n360(280.46646+36000.76983*T+0.0003032*T*T);
+  var M=n360(357.52911+35999.05029*T-0.0001537*T*T),Mr=M*D2R;
+  var C=(1.914602-0.004817*T-1.4e-5*T*T)*Math.sin(Mr)+(0.019993-1.01e-4*T)*Math.sin(2*Mr)+2.89e-4*Math.sin(3*Mr);
+  var om=125.04-1934.136*T;return n360(L0+C-0.00569-0.00478*Math.sin(om*D2R));}
+function moonLong(J){var T=(J-2451545)/36525;
+  var Lp=n360(218.3164477+481267.88123421*T-0.0015786*T*T);
+  var D=n360(297.8501921+445267.1114034*T-0.0018819*T*T);
+  var M=n360(357.5291092+35999.0502909*T);
+  var Mp=n360(134.9633964+477198.8675055*T+0.0087414*T*T);
+  var F=n360(93.272095+483202.0175233*T);
+  var Dr=D*D2R,Mr=M*D2R,Mpr=Mp*D2R,Fr=F*D2R;
+  var dl=6.288774*Math.sin(Mpr)+1.274027*Math.sin(2*Dr-Mpr)+0.658314*Math.sin(2*Dr)
+    +0.213618*Math.sin(2*Mpr)-0.185116*Math.sin(Mr)-0.114332*Math.sin(2*Fr)
+    +0.058793*Math.sin(2*Dr-2*Mpr)+0.057066*Math.sin(2*Dr-Mr-Mpr)
+    +0.053322*Math.sin(2*Dr+Mpr)+0.045758*Math.sin(2*Dr-Mr);
+  return n360(Lp+dl);}
+function moonElong(J){return n360(moonLong(J)-sunLong(J));}
+function sunEvent(y,m,d,which){var J=jdnInt(y,m,d),T=(J-2451545)/36525;
+  var L0=n360(280.46646+36000.76983*T+0.0003032*T*T);
+  var M=n360(357.52911+35999.05029*T-0.0001537*T*T),Mr=M*D2R;
+  var e=0.016708634-4.2037e-5*T-1.267e-7*T*T;
+  var C=Math.sin(Mr)*(1.914602-0.004817*T-1.4e-5*T*T)+Math.sin(2*Mr)*(0.019993-1.01e-4*T)+Math.sin(3*Mr)*2.89e-4;
+  var om=125.04-1934.136*T,lam=L0+C-0.00569-0.00478*Math.sin(om*D2R);
+  var eps0=23+(26+(21.448-T*(46.815+T*(0.00059-T*0.001813)))/60)/60;
+  var eps=eps0+0.00256*Math.cos(om*D2R);
+  var decl=Math.asin(Math.sin(eps*D2R)*Math.sin(lam*D2R))*R2D;
+  var y2=Math.pow(Math.tan(eps/2*D2R),2);
+  var Eq=4*R2D*(y2*Math.sin(2*L0*D2R)-2*e*Math.sin(Mr)+4*e*y2*Math.sin(Mr)*Math.cos(2*L0*D2R)-0.5*y2*y2*Math.sin(4*L0*D2R)-1.25*e*e*Math.sin(2*Mr));
+  var cosH=Math.cos(90.833*D2R)/(Math.cos(LAT*D2R)*Math.cos(decl*D2R))-Math.tan(LAT*D2R)*Math.tan(decl*D2R);
+  var ha=Math.acos(Math.max(-1,Math.min(1,cosH)))*R2D;
+  var noon=720-4*LON-Eq+TZ*60;
+  return which==='rise'?(noon-4*ha)/60:(noon+4*ha)/60;}
+
+/* ---------- Chinese cycle ---------- */
+var STEM=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+var BR=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+var STEM_EL=[0,0,1,1,2,2,3,3,4,4];           // 0木1火2土3金4水
+var BR_EL=[4,2,0,0,2,1,1,2,3,3,2,4];          // main qi
+var EL_HANZI=['木','火','土','金','水'];
+var EL_NAME=['Wood','Fire','Earth','Metal','Water'];
+function dayGZ(y,m,d){var J=jdnInt(y,m,d);return{s:((J%10)+9+100)%10,b:((J%12)+1+120)%12,jdn:J};}
+function monthBranch(sl){var idx=Math.floor(n360(sl-315)/30);return (idx+2)%12;} // 寅=2
+function yearGZ(y){return{s:((y-4)%10+10)%10,b:((y-4)%12+12)%12};}
+
+/* personal: 丙 DM Fire, wealth element Metal(3); natal day branch 寅(2) */
+var WEALTH_EL=3, NATAL_DAY_BR=2;
+
+/* 十干祿 — day-stem prosperity branch (100% classical) */
+var LU_BRANCH=[2,3,5,6,5,6,8,9,11,0]; // 甲寅乙卯丙巳丁午戊巳己午庚申辛酉壬亥癸子
+/* branch -> 8-direction (only 祿 branches occur: 寅卯巳午申酉亥子) */
+var BR_DIR={2:['NE',45,'東北'],3:['E',90,'正東'],5:['SE',135,'東南'],6:['S',180,'正南'],
+            8:['SW',225,'西南'],9:['W',270,'正西'],11:['NW',315,'西北'],0:['N',0,'正北']};
+
+/* ============================================================================
+   MONEY ACTIVITY REGISTRY
+   ============================================================================ */
+var ACT=[
+  {key:'seek',     en:'Seek income & gains',     cn:'求財', about:'pursuing money: sales, clients, asking for what you are owed or worth'},
+  {key:'collect',  en:'Collect what is owed',    cn:'納財', about:'receivables, debts owed to you, incoming payments, harvesting'},
+  {key:'open',     en:'Open or launch an earner',cn:'開市', about:'starting a business, opening a new income stream'},
+  {key:'deal',     en:'Sign deals & contracts',  cn:'立券', about:'financial contracts, closing trades, binding money agreements'},
+  {key:'invest',   en:'Invest & commit capital', cn:'投資', about:'longer-horizon commitment of money into positions or assets'},
+  {key:'speculate',en:'Speculate & take risk',   cn:'求利', about:'leverage, short-term trading, high-variance plays'},
+  {key:'spend',    en:'Big spends & outlays',    cn:'出貨', about:'large purchases, disbursing, releasing money out'},
+  {key:'lend',     en:'Lend & extend credit',    cn:'放貸', about:'lending money, fronting credit to others'},
+  {key:'settle',   en:'Settle & repay debt',     cn:'還債', about:'clearing obligations, paying down what you owe, cutting losses'},
+  {key:'save',     en:'Save & store reserves',   cn:'入庫', about:'moving money into savings, locking away reserves'},
+  {key:'negotiate',en:'Negotiate terms & price', cn:'議價', about:'haggling, financial negotiation, setting terms'},
+  {key:'review',   en:'Review & plan finances',  cn:'理財', about:'bookkeeping, budgeting, auditing, financial planning'},
+  {key:'decide',   en:'Major money decisions',   cn:'決斷', about:'large, hard-to-reverse financial commitments'}
+];
+var ACT_BY_KEY={}; ACT.forEach(function(a){ACT_BY_KEY[a.key]=a;});
+
+/* ============================================================================
+   SYSTEMS — wealth lens. Each returns
+   {name,glyph,native,reading,family,rel,quality(money tone -1..1),yi:[],ji:[]}
+   ============================================================================ */
+
+/* 1. Twelve Day Officers 建除 — money lens */
+var OFFICERS=[
+  {n:'建',en:'Establish',  q:0.15, yi:['seek','open'],                                   ji:['spend']},
+  {n:'除',en:'Remove',     q:0.10, yi:['settle','review'],                               ji:['invest','open','speculate']},
+  {n:'满',en:'Full',       q:0.35, yi:['collect','seek','save'],                         ji:['lend']},
+  {n:'平',en:'Balance',    q:0.00, yi:['review','negotiate'],                            ji:['speculate']},
+  {n:'定',en:'Stable',     q:0.45, yi:['deal','invest','save','collect'],               ji:['speculate','spend']},
+  {n:'执',en:'Initiate',   q:0.15, yi:['collect','settle','save'],                       ji:['open','spend','speculate']},
+  {n:'破',en:'Destruction',q:-0.70,yi:['settle','review'],                               ji:['seek','open','deal','invest','speculate','lend','spend','decide']},
+  {n:'危',en:'Danger',     q:-0.45,yi:['review','save'],                                 ji:['speculate','invest','decide','spend','lend']},
+  {n:'成',en:'Success',    q:0.65, yi:['seek','open','deal','invest','collect','decide','negotiate'], ji:[]},
+  {n:'收',en:'Receive',    q:0.60, yi:['collect','seek','save','settle'],               ji:['lend','spend']},
+  {n:'开',en:'Open',       q:0.65, yi:['open','seek','deal','invest','negotiate'],      ji:[]},
+  {n:'闭',en:'Close',      q:-0.30,yi:['save','review','settle'],                        ji:['open','seek','invest','deal','speculate']}
+];
+function sysOfficer(c){
+  var off=((c.db-c.mb)%12+12)%12, o=OFFICERS[off];
+  return {name:'Twelve Officers',glyph:o.n,native:o.n+' · '+o.en+' Officer',
+    reading:'The 建除 officer governs '+o.en.toLowerCase()+' — '+officerMoneyLine(o.n)+'.',
+    family:'cn_daybranch',rel:1.00,quality:o.q,yi:o.yi,ji:o.ji};
+}
+function officerMoneyLine(n){return {
+  '建':'good to begin earning, not to disburse','除':'clear debts and bad arrangements','满':'money flows in, hold off lending',
+  '平':'keep the books level','定':'lock in terms and long positions','执':'hold and collect, do not open',
+  '破':'the 破財 day — protect capital','危':'risk runs high, guard reserves','成':'wealth matters succeed broadly',
+  '收':'the collection day — receive and store','开':'open and pursue freely','闭':'seal and save, do not open'
+}[n];}
+
+/* 2. Yellow / Black Path day-god 黄黑道 — money lens (金匮 = wealth chest) */
+var PATH_GODS=[
+  {n:'青龙',aus:1,q:0.55,yi:['seek','open','invest','collect'],ji:[]},
+  {n:'明堂',aus:1,q:0.50,yi:['negotiate','deal','decide'],ji:[]},
+  {n:'天刑',aus:0,q:-0.50,yi:['settle'],ji:['deal','lend','invest','speculate']},
+  {n:'朱雀',aus:0,q:-0.50,yi:[],ji:['negotiate','deal','lend','speculate']},
+  {n:'金匮',aus:1,q:0.72,yi:['seek','collect','save','open','invest','deal'],ji:[]}, // golden chest
+  {n:'天德',aus:1,q:0.50,yi:['seek','settle','decide','collect'],ji:[]},
+  {n:'白虎',aus:0,q:-0.50,yi:[],ji:['speculate','invest','spend','lend']},
+  {n:'玉堂',aus:1,q:0.45,yi:['review','deal','decide','save'],ji:[]},
+  {n:'天牢',aus:0,q:-0.50,yi:['review'],ji:['invest','lend','open','speculate']},
+  {n:'玄武',aus:0,q:-0.55,yi:[],ji:['speculate','lend','deal','spend','seek']},      // theft / deception
+  {n:'司命',aus:1,q:0.40,yi:['seek','open','save','collect'],ji:[]},
+  {n:'勾陈',aus:0,q:-0.40,yi:['review'],ji:['deal','lend','invest']}
+];
+function sysPath(c){
+  var startByMonth={2:0,8:0, 3:2,9:2, 4:4,10:4, 5:6,11:6, 0:8,6:8, 1:10,7:10};
+  var gi=((c.db-startByMonth[c.mb])%12+12)%12, g=PATH_GODS[gi];
+  var special=g.n==='金匮'?' — the “golden chest”, the wealth star':g.n==='玄武'?' — guard against loss and deception':'';
+  return {name:'Yellow-Black Path',glyph:g.n,native:g.n+(g.aus?' · 黄道':' · 黑道'),
+    reading:(g.aus?'A yellow-path day-god, kind to wealth':'A black-path day-god, hard on wealth')+special+'.',
+    family:'cn_daybranch',rel:0.85,quality:g.q,yi:g.yi,ji:g.ji};
+}
+
+/* 3. Twenty-eight Mansions 二十八宿 — money lens (minor; luminary locked to weekday) */
+var MANSIONS=[ // order from 角; mq money-quality; a few wealth specials
+  {n:'角',mq:0.30,yi:['seek','open'],ji:[]},        {n:'亢',mq:-0.25,yi:[],ji:['seek','open']},
+  {n:'氐',mq:-0.25,yi:['settle'],ji:['invest','lend']}, {n:'房',mq:0.32,yi:['seek','collect','open'],ji:[]},
+  {n:'心',mq:-0.28,yi:[],ji:['open','invest','deal']}, {n:'尾',mq:0.30,yi:['collect','save'],ji:[]},
+  {n:'箕',mq:0.20,yi:['collect','seek'],ji:['save']}, {n:'斗',mq:0.36,yi:['seek','collect','save'],ji:[]}, // measure of grain
+  {n:'牛',mq:-0.10,yi:['collect'],ji:['speculate']},  {n:'女',mq:-0.22,yi:['review'],ji:['deal','invest']},
+  {n:'虚',mq:-0.28,yi:['settle'],ji:['seek','invest','open']}, {n:'危',mq:-0.30,yi:['save','review'],ji:['speculate','invest']},
+  {n:'室',mq:0.30,yi:['seek','save'],ji:[]},          {n:'壁',mq:0.30,yi:['save','collect'],ji:[]},
+  {n:'奎',mq:0.0,yi:['review'],ji:['speculate']},     {n:'娄',mq:0.30,yi:['collect','seek'],ji:[]},
+  {n:'胃',mq:0.34,yi:['save','collect'],ji:[]},       {n:'昴',mq:-0.26,yi:[],ji:['open','invest','deal']}, // granary
+  {n:'毕',mq:0.30,yi:['seek','save'],ji:[]},          {n:'觜',mq:-0.26,yi:['settle'],ji:['seek','invest']},
+  {n:'参',mq:0.05,yi:['seek'],ji:['lend']},           {n:'井',mq:0.28,yi:['open','seek'],ji:[]},
+  {n:'鬼',mq:-0.26,yi:['save','review'],ji:['seek','invest','speculate']}, {n:'柳',mq:-0.26,yi:[],ji:['seek','deal','open']},
+  {n:'星',mq:0.0,yi:['negotiate'],ji:['lend']},       {n:'张',mq:0.30,yi:['seek','collect'],ji:[]},
+  {n:'翼',mq:-0.26,yi:['settle'],ji:['seek','invest','open']}, {n:'轸',mq:0.32,yi:['seek','collect','open'],ji:[]}
+];
+var LUM_HANZI=['日','月','火','水','木','金','土'];
+function sysMansion(c){
+  var idx=((c.ds.jdn+4)%28+28)%28, ms=MANSIONS[idx], lum=(4+idx)%7;
+  return {name:'28 Mansions',glyph:ms.n,native:ms.n+'宿 · '+LUM_HANZI[lum]+'曜',
+    reading:ms.mq>0.1?'A wealth-kind lunar mansion.':ms.mq<-0.1?'A wealth-wary lunar mansion.':'A neutral lunar mansion.',
+    family:'cn_mansion',rel:0.40,quality:ms.mq,yi:ms.yi,ji:ms.ji};
+}
+
+/* 4. Tithi — money lens */
+var TITHI_NAMES=['Pratipada','Dvitiya','Tritiya','Chaturthi','Panchami','Shashthi','Saptami','Ashtami','Navami','Dashami','Ekadashi','Dvadashi','Trayodashi','Chaturdashi','Purnima'];
+var TITHI_CLASS=[
+  {c:'Nanda',q:0.30,yi:['seek','open','collect'],ji:[]},
+  {c:'Bhadra',q:0.40,yi:['seek','deal','invest'],ji:[]},
+  {c:'Jaya',q:0.30,yi:['seek','collect','decide'],ji:[]},
+  {c:'Rikta',q:-0.40,yi:['settle','review'],ji:['seek','open','invest','deal']},
+  {c:'Purna',q:0.40,yi:['collect','deal','save','decide'],ji:[]}
+];
+function sysTithi(c){
+  var t=Math.floor(c.elong/12)+1; if(t>30)t=30;
+  var wp=((t-1)%15), paksha=t<=15?'Shukla':'Krishna', cls=TITHI_CLASS[wp%5];
+  var nm=TITHI_NAMES[wp]; if(t===30)nm='Amavasya';
+  var yi=cls.yi.slice(), ji=cls.ji.slice(), q=cls.q;
+  if(t===30){yi=['review','save'];ji=['invest','decide','open','speculate'];q=-0.20;}
+  return {name:'Tithi',glyph:'☾',native:nm+' · '+cls.c,
+    reading:paksha+' paksha — a '+cls.c+'-class lunar day for money.',family:'lunar_elong',
+    rel:0.55,quality:q,yi:yi,ji:ji};
+}
+
+/* 5. Nakshatra — money lens (Dhanishta = wealth star) */
+var NAK=['Ashwini','Bharani','Krittika','Rohini','Mrigashira','Ardra','Punarvasu','Pushya','Ashlesha','Magha','P.Phalguni','U.Phalguni','Hasta','Chitra','Swati','Vishakha','Anuradha','Jyeshtha','Mula','P.Ashadha','U.Ashadha','Shravana','Dhanishta','Shatabhisha','P.Bhadra','U.Bhadra','Revati'];
+var NAK_CLASS=['K','U','X','F','S','T','M','K','T','U','U','F','K','S','M','X','S','T','T','U','F','M','M','M','U','F','S'];
+var NAK_CLASS_MAP={
+  F:{name:'Fixed',q:0.40,yi:['invest','save','deal','open'],ji:[]},
+  M:{name:'Movable',q:0.20,yi:['seek','collect','negotiate'],ji:[]},
+  U:{name:'Fierce',q:-0.20,yi:['settle'],ji:['seek','invest','open']},
+  S:{name:'Soft',q:0.30,yi:['negotiate','deal','collect'],ji:[]},
+  T:{name:'Sharp',q:-0.20,yi:['settle','review'],ji:['invest','seek']},
+  X:{name:'Mixed',q:0.00,yi:['review'],ji:[]},
+  K:{name:'Swift',q:0.40,yi:['seek','collect','negotiate','deal'],ji:[]}
+};
+function sysNak(c){
+  var ayan=24.16, sid=n360(c.moonL-ayan);
+  var i=Math.floor(sid/(360/27))%27, cls=NAK_CLASS_MAP[NAK_CLASS[i]];
+  var yi=cls.yi.slice(), ji=cls.ji.slice(), q=cls.q, note='';
+  if(i===22){yi=uniq(yi.concat(['seek','collect','save','invest'])); q=Math.min(0.6,q+0.2); note=' (Dhaniṣṭhā — the wealth star)';}
+  if(i===7){yi=uniq(yi.concat(['seek','collect','save'])); q=Math.min(0.6,q+0.15); note=' (Puṣya — most auspicious)';}
+  if(i===3){yi=uniq(yi.concat(['invest','save'])); note=' (Rohiṇī — growth & prosperity)';}
+  if(i===12){yi=uniq(yi.concat(['seek','collect'])); note=' (Hasta — the grasping hand)';}
+  return {name:'Nakshatra',glyph:'✶',native:NAK[i]+' · '+cls.name,
+    reading:'A '+cls.name+'-class star'+note+'.',family:'lunar_long',
+    rel:0.55,quality:q,yi:yi,ji:ji};
+}
+
+/* 6. Vara — weekday lord, money lens (Mercury merchant, Jupiter wealth) */
+var PGLYPH={Sun:'☉',Moon:'☽',Mars:'♂',Mercury:'☿',Jupiter:'♃',Venus:'♀',Saturn:'♄'};
+var VARA=[
+  {lord:'Sun',    q:0.10, yi:['decide','seek'],                          ji:['lend']},
+  {lord:'Moon',   q:0.15, yi:['collect','negotiate'],                    ji:[]},
+  {lord:'Mars',   q:-0.10,yi:['seek','collect'],                         ji:['deal','lend','speculate']},
+  {lord:'Mercury',q:0.45, yi:['deal','negotiate','seek','open','invest','review'], ji:[]},
+  {lord:'Jupiter',q:0.50, yi:['seek','invest','open','collect','decide'],ji:[]},
+  {lord:'Venus',  q:0.30, yi:['spend','negotiate','collect','save'],     ji:[]},
+  {lord:'Saturn', q:-0.10,yi:['settle','save','review'],                 ji:['open','seek','speculate','invest']}
+];
+function sysVara(c){
+  var v=VARA[c.wd];
+  return {name:'Weekday Lord',glyph:PGLYPH[v.lord],native:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][c.wd]+' · '+v.lord,
+    reading:v.lord+' rules the day — '+(v.lord==='Mercury'?'the merchant\u2019s day':v.lord==='Jupiter'?'the banker\u2019s day':v.q>0.25?'kind to money':v.q<0?'slow, debt-leaning money':'neutral for money')+'.',
+    family:'weekday',rel:0.50,quality:v.q,yi:v.yi,ji:v.ji};
+}
+
+/* ============================================================================
+   TIME WINDOWS — same engine as Auspice; money framing surfaces Labh (gain) slots
+   ============================================================================ */
+var PLANET7=['Saturn','Jupiter','Mars','Sun','Venus','Mercury','Moon'];
+var dayLord7=[3,6,2,5,1,4,0];
+var PSCORE={Jupiter:0.7,Mercury:0.6,Venus:0.5,Sun:0.2,Moon:0.0,Mars:-0.4,Saturn:-0.4};
+var CHOG=['Udveg','Char','Labh','Amrit','Kaal','Shubh','Rog'];
+var CHOG_START=[0,3,6,2,5,1,4];
+var CHOG_SCORE={Amrit:0.8,Shubh:0.6,Labh:0.85,Char:0.1,Udveg:-0.5,Rog:-0.6,Kaal:-0.7};
+var RAHU=[7,1,6,4,5,3,2], YAMA=[4,3,2,1,0,6,5], GULIKA=[6,5,4,3,2,1,0];
+
+function planetaryRulerAt(c,h){
+  var sr=c.sr,ss=c.ss,dayLen=ss-sr,nightLen=24-dayLen,isDay,nHour;
+  if(h+1e-6>=sr&&h<ss){isDay=true;nHour=Math.floor((h-sr)/(dayLen/12));}
+  else{isDay=false;var t=h<sr?h+24:h;nHour=Math.floor((t-ss)/(nightLen/12));}
+  return PLANET7[(dayLord7[c.wd]+(isDay?nHour:nHour+12))%7];
+}
+function chogAt(c,h){
+  var sr=c.sr,ss=c.ss,dayLen=ss-sr,nightLen=24-dayLen,slot;
+  if(h+1e-6>=sr&&h<ss){slot=Math.floor((h-sr)/(dayLen/8));}
+  else{var t=h<sr?h+24:h;slot=8+Math.floor((t-ss)/(nightLen/8));}
+  return CHOG[(CHOG_START[c.wd]+slot)%7];
+}
+function buildWindows(c){
+  var sr=c.sr,ss=c.ss,dayLen=ss-sr, part=dayLen/8, noon=(sr+ss)/2, mu=dayLen/15;
+  var named=[];
+  function band(label,kind,a,b){named.push({label:label,kind:kind,start:a,end:b});}
+  band('Rahu Kalam','inauspicious', sr+RAHU[c.wd]*part,   sr+(RAHU[c.wd]+1)*part);
+  band('Yamaganda','inauspicious',  sr+YAMA[c.wd]*part,   sr+(YAMA[c.wd]+1)*part);
+  band('Gulika','caution',          sr+GULIKA[c.wd]*part, sr+(GULIKA[c.wd]+1)*part);
+  if(c.wd!==3) band('Abhijit','auspicious', noon-mu/2, noon+mu/2);
+  // Labh (gain) choghadiya windows — money highlight
+  var labh=[]; for(var s=0;s<8;s++){ if(CHOG[(CHOG_START[c.wd]+s)%7]==='Labh'){ labh.push([sr+s*part, sr+(s+1)*part]); } }
+  labh.forEach(function(w){ band('Labh 利','gain', w[0], w[1]); });
+  // 48 half-hour heat cells
+  var ribbon=[];
+  for(var i=0;i<48;i++){
+    var h=i*0.5+0.25, pr=planetaryRulerAt(c,h), ch=chogAt(c,h);
+    var v=0.55*CHOG_SCORE[ch]+0.45*PSCORE[pr];
+    var inAbhijit=(c.wd!==3 && h>=noon-mu/2 && h<=noon+mu/2);
+    var inRahu=(h>=sr+RAHU[c.wd]*part && h<sr+(RAHU[c.wd]+1)*part);
+    var inYama=(h>=sr+YAMA[c.wd]*part && h<sr+(YAMA[c.wd]+1)*part);
+    if(inAbhijit)v=Math.max(v,0.75);
+    if(inRahu||inYama)v=Math.min(v,-0.75);
+    ribbon.push({h:h, v:Math.max(-1,Math.min(1,v)), chog:ch, planet:pr});
+  }
+  named.sort(function(a,b){return a.start-b.start;});
+  return {named:named, ribbon:ribbon, sunrise:sr, sunset:ss, noon:noon};
+}
+
+/* ============================================================================
+   AGGREGATION
+   ============================================================================ */
+function aggregate(systems){
+  var fav={},avo={},favSrc={},avoSrc={};
+  systems.forEach(function(s){
+    s.yi.forEach(function(k){fav[k]=(fav[k]||0)+s.rel;(favSrc[k]=favSrc[k]||[]).push(s.name);});
+    s.ji.forEach(function(k){avo[k]=(avo[k]||0)+s.rel;(avoSrc[k]=avoSrc[k]||[]).push(s.name);});
+  });
+  var favourable=[],avoid=[];
+  ACT.forEach(function(a){
+    var f=fav[a.key]||0,v=avo[a.key]||0,net=f-v;
+    if(net>0.01)favourable.push({key:a.key,en:a.en,cn:a.cn,about:a.about,score:net,sources:uniq(favSrc[a.key]||[])});
+    else if(net<-0.01)avoid.push({key:a.key,en:a.en,cn:a.cn,about:a.about,score:-net,sources:uniq(avoSrc[a.key]||[])});
+  });
+  favourable.sort(function(a,b){return b.score-a.score;});
+  avoid.sort(function(a,b){return b.score-a.score;});
+  return {favourable:favourable,avoid:avoid};
+}
+function uniq(a){var s={},o=[];a.forEach(function(x){if(!s[x]){s[x]=1;o.push(x);}});return o;}
+
+/* ============================================================================
+   PUBLIC: readDay
+   ============================================================================ */
+function readDay(y,m,d){
+  var J=jdnInt(y,m,d), sl=sunLong(J), moonL=moonLong(J), elong=moonElong(J);
+  var ds=dayGZ(y,m,d), mb=monthBranch(sl), db=ds.b, wd=((J+1)%7+7)%7;
+  var sr=sunEvent(y,m,d,'rise'), ss=sunEvent(y,m,d,'set');
+  var ctx={y:y,m:m,d:d,J:J,sl:sl,moonL:moonL,elong:elong,ds:ds,mb:mb,db:db,wd:wd,sr:sr,ss:ss};
+
+  var systems=[sysOfficer(ctx),sysPath(ctx),sysMansion(ctx),sysTithi(ctx),sysNak(ctx),sysVara(ctx)];
+
+  var wsum=0,qsum=0; systems.forEach(function(s){wsum+=s.rel;qsum+=s.rel*s.quality;});
+  var base=qsum/wsum;
+
+  // personal wealth calibration
+  var stemEl=STEM_EL[ds.s], brEl=BR_EL[db];
+  var metalDay=(stemEl===WEALTH_EL||brEl===WEALTH_EL);     // 庚辛 / 申酉
+  var clash=(db===8), harmony6=(db===11), trine=(db===6||db===10);
+  var personal=0, pmsg=null;
+  if(clash){personal-=0.10; pmsg='Your wealth element 金 is active today (申), but 申 clashes your natal 寅 (寅申冲) — money moves, yet volatile. Favour collecting and settling over speculation.';}
+  else if(metalDay){personal+=0.10; pmsg='Metal — your 財星 — is prominent today. Wealth energy is active; act with structure, not impulse.';}
+  else if(trine){personal+=0.08; pmsg='Part of your 寅午戌 Fire trine — your judgement is well-supported today.';}
+  else if(harmony6){personal+=0.10; pmsg='寅亥合 — the day sits in quiet harmony with your pillar.';}
+  var score=Math.max(-1,Math.min(1,base+personal));
+
+  var label,tone;
+  if(score>=0.45){label='Strong for wealth';tone='strong';}
+  else if(score>=0.20){label='Favourable for money';tone='favourable';}
+  else if(score>=-0.10){label='Mixed — be selective';tone='mixed';}
+  else if(score>=-0.35){label='Guard your money';tone='guard';}
+  else {label='Protect & wait';tone='poor';}
+  if(clash && score>-0.10){label='Active but volatile';tone='volatile';}
+
+  var agg=aggregate(systems);
+  var windows=buildWindows(ctx);
+
+  // 日祿 prosperity direction
+  var luBr=LU_BRANCH[ds.s], dir=BR_DIR[luBr];
+  var prosperity={branch:BR[luBr], dir:dir[0], deg:dir[1], cn:dir[2]};
+
+  return {
+    ctx:ctx,
+    pillar:{day:STEM[ds.s]+BR[ds.b], stem:STEM[ds.s], branch:BR[ds.b], stemEl:EL_HANZI[stemEl],
+            year:STEM[yearGZ(y).s]+BR[yearGZ(y).b], monthBranch:BR[mb]},
+    officer:systems[0].glyph, path:systems[1].glyph, mansion:systems[2].glyph,
+    weekday:['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][wd],
+    prosperity:prosperity,
+    money:{score:score, label:label, tone:tone, base:base, personal:personal,
+           clash:clash, metalDay:metalDay, note:pmsg, wealthEl:'金'},
+    systems:systems,
+    favourable:agg.favourable,
+    avoid:agg.avoid,
+    windows:windows
+  };
+}
+
+var Tael={readDay:readDay, ACT:ACT, version:'tael-1.0',
+  _dayGZ:dayGZ,_monthBranch:monthBranch,_sunEvent:sunEvent};
+global.Tael=Tael;
+if(typeof module!=='undefined'&&module.exports){module.exports=Tael;}
+
+})(typeof window!=='undefined'?window:globalThis);
+
+</script>
+<script>
+(function(){
+'use strict';
+var WD3=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function pad(n){return (n<10?'0':'')+n;}
+function $(id){return document.getElementById(id);}
+function mytNow(){var now=new Date();var m=new Date(now.getTime()+(now.getTimezoneOffset()+480)*60000);
+  return {y:m.getFullYear(),mo:m.getMonth()+1,d:m.getDate(),h:m.getHours(),mi:m.getMinutes(),s:m.getSeconds(),date:m};}
+function hm(x){var h=Math.floor(x),m=Math.round((x-h)*60);if(m===60){h++;m=0;}return pad(h)+':'+pad(m);}
+
+var today,view;
+function sameDay(a,b){return a.y===b.y&&a.mo===b.mo&&a.d===b.d;}
+function viewDateObj(){return new Date(view.y,view.mo-1,view.d);}
+function shiftView(delta){var dt=viewDateObj();dt.setDate(dt.getDate()+delta);view={y:dt.getFullYear(),mo:dt.getMonth()+1,d:dt.getDate()};render();}
+
+function render(){
+  var r=Tael.readDay(view.y,view.mo,view.d);
+  var isToday=sameDay(view,today);
+
+  var metalChip=r.money.metalDay?'<span class="chip metal"><b>金</b>wealth element active</span>':'';
+  $('chips').innerHTML=
+    '<span class="chip gold"><b>'+r.pillar.day+'</b>day</span>'+
+    '<span class="chip"><b>'+r.officer+'</b>'+OFFICER_EN[r.officer]+' officer</span>'+
+    metalChip+
+    '<span class="chip">'+r.weekday+'</span>';
+
+  var dt=viewDateObj();
+  $('viewing').textContent=isToday?'· today ·':(WD3[dt.getDay()]+' '+pad(view.d)+' '+MON[view.mo-1]+' '+view.y);
+
+  // verdict
+  var v=$('verdict'); v.className='verdict tone-'+r.money.tone;
+  v.querySelector('.kicker').textContent=isToday?'For money, today reads as':'For money, this day reads as';
+  $('verdictLabel').textContent=r.money.label;
+  $('pillarline').innerHTML='<span class="han">'+r.pillar.day+'</span> <span class="eng">'+elEN(r.pillar.stemEl)+'·'+brElEN(r.pillar.branch)+'</span>'+
+    ' &nbsp;·&nbsp; <span class="han">'+r.officer+'</span> <span class="eng">'+OFFICER_EN[r.officer]+'</span> officer'+
+    ' &nbsp;·&nbsp; <span class="han">'+r.path+'</span> <span class="eng">'+PATH_EN[r.path]+'</span>'+
+    ' &nbsp;·&nbsp; '+r.systems[3].native+' &nbsp;·&nbsp; '+r.systems[4].native.split(' (')[0];
+  var pn=$('pnote');
+  if(r.money.note){pn.style.display='';pn.textContent=r.money.note;pn.className='pnote'+(r.money.clash?' volatile':'');}
+  else pn.style.display='none';
+
+  drawScale(r.money.score, r.money.tone);
+  drawCompass(r.prosperity.deg);
+  $('prosVal').innerHTML=dirName(r.prosperity.dir)+' <span class="han">'+r.prosperity.cn+' · 祿在'+r.prosperity.branch+'</span>';
+
+  $('gainList').innerHTML=r.favourable.length?r.favourable.map(function(a){return actRow(a,'y');}).join(''):'<div class="empty">No money activity is specially favoured — a flat day.</div>';
+  $('guardList').innerHTML=r.avoid.length?r.avoid.map(function(a){return actRow(a,'j');}).join(''):'<div class="empty">Nothing is specially flagged to guard against today.</div>';
+
+  $('sysGrid').innerHTML=r.systems.map(sysCard).join('');
+  renderWindows(r,isToday);
+  $('winHint').textContent=isToday?'MYT · live':'hours for '+pad(view.d)+' '+MON[view.mo-1];
+}
+
+function dirName(d){return {N:'North',NE:'North-east',E:'East',SE:'South-east',S:'South',SW:'South-west',W:'West',NW:'North-west'}[d]||d;}
+
+/* ---------- balance scale ---------- */
+function drawScale(score,tone){
+  var cx=150, pivotY=70, half=92, chain=46, panR=30;
+  var ang=-Math.max(-0.92,Math.min(0.92,score))*18; // deg; +score -> gain(left) dips
+  var gainCol=score>=0?'var(--gain-bright)':'var(--gain)';
+  var guardCol=score<0?'var(--guard-bright)':'var(--guard)';
+  var beamCol=tone==='volatile'?'var(--gold-bright)':'var(--silver)';
+  // static stand + fulcrum
+  var s='';
+  s+='<line x1="'+cx+'" y1="'+pivotY+'" x2="'+cx+'" y2="190" stroke="var(--silver-dim)" stroke-width="3.5" stroke-linecap="round"/>';
+  s+='<rect x="'+(cx-34)+'" y="190" width="68" height="7" rx="3.5" fill="var(--silver-dim)"/>';
+  s+='<rect x="'+(cx-50)+'" y="197" width="100" height="5" rx="2.5" fill="#2b333c"/>';
+  s+='<polygon points="'+(cx-13)+',71 '+(cx+13)+',71 '+cx+',50" fill="'+beamCol+'" opacity="0.92"/>';
+  s+='<circle cx="'+cx+'" cy="'+pivotY+'" r="4" fill="var(--gold-bright)"/>';
+  // rotating beam group (SVG user-space rotate about pivot — correct at any render size)
+  s+='<g id="scaleBeam" transform="rotate('+ang.toFixed(2)+' '+cx+' '+pivotY+')">';
+  s+='<line x1="'+(cx-half)+'" y1="'+pivotY+'" x2="'+(cx+half)+'" y2="'+pivotY+'" stroke="'+beamCol+'" stroke-width="5" stroke-linecap="round"/>';
+  s+='<circle cx="'+(cx-half)+'" cy="'+pivotY+'" r="3" fill="'+beamCol+'"/><circle cx="'+(cx+half)+'" cy="'+pivotY+'" r="3" fill="'+beamCol+'"/>';
+  // pans (hang from each beam end)
+  s+=pan(cx-half,pivotY,chain,panR,gainCol,'進');
+  s+=pan(cx+half,pivotY,chain,panR,guardCol,'守');
+  s+='</g>';
+  $('scaleSvg').innerHTML=s;
+}
+function pan(x,y,chain,r,col,label){
+  var py=y+chain;
+  var s='';
+  s+='<line x1="'+(x-r*0.7)+'" y1="'+y+'" x2="'+x+'" y2="'+py+'" stroke="var(--silver-dim)" stroke-width="1"/>';
+  s+='<line x1="'+(x+r*0.7)+'" y1="'+y+'" x2="'+x+'" y2="'+py+'" stroke="var(--silver-dim)" stroke-width="1"/>';
+  s+='<path d="M'+(x-r)+' '+py+' A '+r+' '+(r*0.5)+' 0 0 0 '+(x+r)+' '+py+' Z" fill="'+col+'" opacity="0.16"/>';
+  s+='<path d="M'+(x-r)+' '+py+' A '+r+' '+(r*0.5)+' 0 0 0 '+(x+r)+' '+py+'" fill="none" stroke="'+col+'" stroke-width="2"/>';
+  s+='<text x="'+x+'" y="'+(py+1)+'" fill="'+col+'" font-family="var(--cjk)" font-weight="700" font-size="17" text-anchor="middle" dominant-baseline="middle">'+label+'</text>';
+  return s;
+}
+
+/* ---------- compass ---------- */
+function drawCompass(deg){
+  var cx=60,cy=60,R=46;
+  var s='';
+  s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none" stroke="var(--line)" stroke-width="1.5"/>';
+  s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+(R-9)+'" fill="none" stroke="var(--line2)" stroke-width="1"/>';
+  var dirs=[['N',0],['E',90],['S',180],['W',270]];
+  dirs.forEach(function(d){
+    var b=d[1]*Math.PI/180, tx=cx+(R-4)*Math.sin(b), ty=cy-(R-4)*Math.cos(b);
+    s+='<text x="'+tx.toFixed(1)+'" y="'+(ty+3).toFixed(1)+'" fill="var(--ink-mute)" font-family="var(--mono)" font-size="8.5" text-anchor="middle">'+d[0]+'</text>';
+  });
+  var rad=deg*Math.PI/180, nx=cx+(R-13)*Math.sin(rad), ny=cy-(R-13)*Math.cos(rad);
+  var bx=cx-(R-30)*Math.sin(rad), by=cy+(R-30)*Math.cos(rad);
+  s+='<line x1="'+bx.toFixed(1)+'" y1="'+by.toFixed(1)+'" x2="'+nx.toFixed(1)+'" y2="'+ny.toFixed(1)+'" stroke="var(--gold-bright)" stroke-width="2.5" stroke-linecap="round"/>';
+  s+='<circle cx="'+nx.toFixed(1)+'" cy="'+ny.toFixed(1)+'" r="3.5" fill="var(--gold-bright)"/>';
+  s+='<circle cx="'+cx+'" cy="'+cy+'" r="2.5" fill="var(--silver-dim)"/>';
+  $('compass').innerHTML=s;
+}
+
+/* ---------- activity rows ---------- */
+function strDots(score,max){var n=Math.max(1,Math.min(4,Math.round(score/max*4)));var s='';for(var i=0;i<4;i++)s+='<i class="'+(i<n?'on':'')+'"></i>';return s;}
+var MAXFAV=3.2,MAXAVO=2.8;
+function actRow(a,cls){
+  var max=cls==='y'?MAXFAV:MAXAVO, srcN=a.sources.length;
+  return '<div class="act"><span class="cn">'+a.cn+'</span>'+
+    '<span class="body"><span class="en">'+a.en+'</span>'+
+      '<span class="src">'+srcN+' system'+(srcN>1?'s':'')+' · '+a.sources.map(shortSys).join(' · ')+'</span></span>'+
+    '<span class="str">'+strDots(a.score,max)+'</span></div>';
+}
+function shortSys(n){return {'Twelve Officers':'建除','Yellow-Black Path':'黄黑道','28 Mansions':'宿','Tithi':'Tithi','Nakshatra':'Nakṣ','Weekday Lord':'曜'}[n]||n;}
+
+function sysCard(s){
+  var q=s.quality,w=Math.abs(q)*50,left=q>=0?50:(50-w),col=q>=0?'var(--gain)':'var(--guard)';
+  var tags='';
+  s.yi.slice(0,3).forEach(function(k){tags+='<span class="tag y">'+cn(k)+'<span class="te">'+k+'</span></span>';});
+  s.ji.slice(0,3).forEach(function(k){tags+='<span class="tag j">'+cn(k)+'<span class="te">'+k+'</span></span>';});
+  return '<div class="syscard"><div class="sh"><div class="gl" style="font-size:'+glyphFont(s.glyph)+'px">'+s.glyph+'</div>'+
+    '<div class="si"><div class="nm">'+s.name+'</div><div class="nv">'+s.native+sysGloss(s)+'</div></div></div>'+
+    '<div class="rd">'+s.reading+'</div>'+
+    '<div class="tags">'+(tags||'<span class="tag" style="color:var(--ink-mute);border:1px solid var(--line)">— neutral —</span>')+'</div>'+
+    '<div class="qbar"><div class="z"></div><i style="left:'+left.toFixed(1)+'%;width:'+w.toFixed(1)+'%;background:'+col+';opacity:'+(0.42+0.55*Math.abs(q)).toFixed(2)+'"></i></div></div>';
+}
+function glyphFont(g){var cjk=(g.match(/[\u3400-\u9FFF\uF900-\uFAFF]/g)||[]).length,other=g.length-cjk;
+  if(cjk>=2)return 17; if(cjk===1&&other===0)return 25; return 21;}
+var CNMAP={seek:'求財',collect:'納財',open:'開市',deal:'立券',invest:'投資',speculate:'求利',spend:'出貨',lend:'放貸',settle:'還債',save:'入庫',negotiate:'議價',review:'理財',decide:'決斷'};
+function cn(k){return CNMAP[k]||k;}
+
+/* --- English glosses for the Chinese system names --- */
+var OFFICER_EN={'建':'Establish','除':'Remove','满':'Full','平':'Balance','定':'Stable','执':'Initiate','破':'Destruction','危':'Danger','成':'Success','收':'Receive','开':'Open','闭':'Close'};
+var PATH_EN={'青龙':'Green Dragon','明堂':'Bright Hall','天刑':'Heavenly Penalty','朱雀':'Vermilion Bird','金匮':'Golden Chest','天德':'Heavenly Virtue','白虎':'White Tiger','玉堂':'Jade Hall','天牢':'Heavenly Jail','玄武':'Dark Warrior','司命':'Life Governor','勾陈':'Hooked Array'};
+var MANSION_EN={'角':'Horn','亢':'Neck','氐':'Root','房':'Room','心':'Heart','尾':'Tail','箕':'Winnowing Basket','斗':'Dipper','牛':'Ox','女':'Girl','虚':'Emptiness','危':'Rooftop','室':'Encampment','壁':'Wall','奎':'Legs','娄':'Bond','胃':'Stomach','昴':'Hairy Head','毕':'Net','觜':'Turtle Beak','参':'Three Stars','井':'Well','鬼':'Ghost','柳':'Willow','星':'Star','张':'Extended Net','翼':'Wings','轸':'Chariot'};
+var LUM_EN={'日':'Sun','月':'Moon','火':'Mars','水':'Mercury','木':'Jupiter','金':'Venus','土':'Saturn'};
+var EL_EN={'木':'Wood','火':'Fire','土':'Earth','金':'Metal','水':'Water'};
+var BR_EL_EN={'子':'Water','丑':'Earth','寅':'Wood','卯':'Wood','辰':'Earth','巳':'Fire','午':'Fire','未':'Earth','申':'Metal','酉':'Metal','戌':'Earth','亥':'Water'};
+function elEN(c){return EL_EN[c]||c;}
+function brElEN(c){return BR_EL_EN[c]||'';}
+function sysGloss(s){
+  if(s.name==='Yellow-Black Path'){var aus=s.native.indexOf('黄道')>=0;return '<span class="nvg">'+(PATH_EN[s.glyph]||'')+' · '+(aus?'Yellow Path':'Black Path')+'</span>';}
+  if(s.name==='28 Mansions'){var m=s.native.match(/·\s*(.)曜/),lum=m?m[1]:'';return '<span class="nvg">'+(MANSION_EN[s.glyph]||'')+(lum?(' · '+(LUM_EN[lum]||'')):'')+'</span>';}
+  return '';
+}
+
+/* ---------- windows ---------- */
+var WX=14,WW=932,WTOP=42,WH=64,WBASE=WTOP+WH;
+function xAt(h){return WX+(h/24)*WW;}
+function heatColor(v){if(v>=0)return mix([90,107,82],[79,197,138],v);return mix([90,107,82],[197,106,74],-v);}
+function mix(a,b,t){t=Math.max(0,Math.min(1,t));return 'rgb('+Math.round(a[0]+(b[0]-a[0])*t)+','+Math.round(a[1]+(b[1]-a[1])*t)+','+Math.round(a[2]+(b[2]-a[2])*t)+')';}
+function renderWindows(r,isToday){
+  var w=r.windows,svg=$('winSvg'),cells=w.ribbon,n=cells.length,cw=WW/n,html='';
+  for(var i=0;i<n;i++){var c=cells[i],x=WX+i*cw;
+    html+='<rect x="'+x.toFixed(1)+'" y="'+WTOP+'" width="'+(cw+0.6).toFixed(1)+'" height="'+WH+'" fill="'+heatColor(c.v)+'" opacity="'+(0.34+0.5*Math.abs(c.v)).toFixed(2)+'"/>';}
+  html+='<g pointer-events="none">';
+  for(var hh=0;hh<=24;hh+=3){var gx=xAt(hh);
+    html+='<line x1="'+gx.toFixed(1)+'" y1="'+WTOP+'" x2="'+gx.toFixed(1)+'" y2="'+WBASE+'" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>';
+    html+='<text x="'+gx.toFixed(1)+'" y="'+(WBASE+15)+'" fill="var(--ink-mute)" font-family="var(--mono)" font-size="9.5" text-anchor="middle">'+pad(hh%24)+'</text>';}
+  function marker(h,label,color){var gx=xAt(h);
+    html+='<line x1="'+gx.toFixed(1)+'" y1="'+(WTOP-7)+'" x2="'+gx.toFixed(1)+'" y2="'+WBASE+'" stroke="'+color+'" stroke-width="1" stroke-dasharray="2 3" opacity="0.7"/>';
+    html+='<text x="'+gx.toFixed(1)+'" y="'+(WTOP-10)+'" fill="'+color+'" font-family="var(--mono)" font-size="8.5" text-anchor="middle">'+label+'</text>';}
+  marker(w.sunrise,'rise','var(--gold-dim)');marker(w.noon,'noon','var(--ink-mute)');marker(w.sunset,'set','var(--gold-dim)');
+  var laneTop=WBASE+22,lh=15,laneGap=4,GAP=3,laneEnds=[];
+  w.named.forEach(function(b){
+    var x1=xAt(b.start),x2=xAt(b.end),bw=Math.max(2,x2-x1),L=-1;
+    for(var li=0;li<laneEnds.length;li++){if(x1>=laneEnds[li]+GAP){L=li;break;}}
+    if(L<0){L=laneEnds.length;laneEnds.push(0);}
+    laneEnds[L]=x2; var ly=laneTop+L*(lh+laneGap);
+    var fill=b.kind==='auspicious'?'var(--gold-bright)':b.kind==='gain'?'var(--gain-bright)':(b.label==='Gulika'?'#6e3a32':'#7a3a2e');
+    var tcol=(b.kind==='auspicious'||b.kind==='gain')?'#14110a':'#f0e6dd';
+    html+='<rect x="'+x1.toFixed(1)+'" y="'+ly+'" width="'+bw.toFixed(1)+'" height="'+lh+'" rx="3" fill="'+fill+'" opacity="0.92"/>';
+    html+='<text x="'+(x1+bw/2).toFixed(1)+'" y="'+(ly+lh-4.5)+'" fill="'+tcol+'" font-family="var(--mono)" font-size="8.5" font-weight="500" text-anchor="middle">'+b.label+'</text>';
+  });
+  html+='</g>';
+  if(isToday){var t=mytNow(),nowH=t.h+t.mi/60+t.s/3600,nx=xAt(nowH);
+    html+='<g class="now-pulse" pointer-events="none"><line x1="'+nx.toFixed(1)+'" y1="'+(WTOP-12)+'" x2="'+nx.toFixed(1)+'" y2="'+(WBASE+2)+'" stroke="var(--gold-bright)" stroke-width="2"/>'+
+      '<polygon points="'+(nx-4).toFixed(1)+','+(WTOP-12)+' '+(nx+4).toFixed(1)+','+(WTOP-12)+' '+nx.toFixed(1)+','+(WTOP-6)+'" fill="var(--gold-bright)"/></g>';}
+  svg.innerHTML=html;
+}
+
+function tick(){
+  var t=mytNow();
+  $('clk').innerHTML=pad(t.h)+':'+pad(t.mi)+':'+pad(t.s)+'<span class="tz">MYT</span>';
+  var d2=t.date; $('datestamp').textContent=WD3[d2.getDay()]+' '+pad(t.d)+' '+MON[t.mo-1]+' '+t.y+' · UTC+8';
+  if(!sameDay(today,{y:t.y,mo:t.mo,d:t.d})){var was=sameDay(view,today);today={y:t.y,mo:t.mo,d:t.d};if(was){view={y:t.y,mo:t.mo,d:t.d};render();}}
+  if(sameDay(view,today)){var g=$('winSvg').querySelector('.now-pulse');var nowH=t.h+t.mi/60+t.s/3600,nx=xAt(nowH);
+    if(g){var ln=g.querySelector('line'),pg=g.querySelector('polygon');ln.setAttribute('x1',nx.toFixed(1));ln.setAttribute('x2',nx.toFixed(1));
+      pg.setAttribute('points',(nx-4).toFixed(1)+','+(WTOP-12)+' '+(nx+4).toFixed(1)+','+(WTOP-12)+' '+nx.toFixed(1)+','+(WTOP-6));}}
+}
+
+function boot(){
+  var t=mytNow(); today={y:t.y,mo:t.mo,d:t.d}; view={y:t.y,mo:t.mo,d:t.d};
+  $('prev').addEventListener('click',function(){shiftView(-1);});
+  $('next').addEventListener('click',function(){shiftView(1);});
+  $('todayBtn').addEventListener('click',function(){view={y:today.y,mo:today.mo,d:today.d};render();});
+  document.addEventListener('keydown',function(e){if(e.key==='ArrowLeft')shiftView(-1);else if(e.key==='ArrowRight')shiftView(1);});
+  render(); tick();
+  var d=new Date(),ms=1000-d.getMilliseconds(); setTimeout(function(){tick();setInterval(tick,1000);},ms);
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+</script>
+</body>
+</html>
